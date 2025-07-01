@@ -1,0 +1,27 @@
+{
+  "name": "library-management",
+  "version": "0.0.0",
+  "description": "A library management app.",
+  "keywords": [
+    "library",
+    "library-management"
+  ],
+  "author": "Md Nazmul Huda",
+  "license": "MIT",
+  "type": "module",
+  "private": "true",
+  "workspaces": [
+    "api",
+    "frontend"
+  ],
+  "scripts": {
+    "dev:api": "npm run dev --workspace api",
+    "dev:frontend": "npm run dev --workspace frontend",
+    "build:api": "npm run build --workspace api",
+    "build:frontend": "npm run build --workspace frontend",
+    "predeploy": "npm run build:frontend",
+    "deploy": "vercel --prod",
+    "preview:api": "npm run build --workspace api && node server",
+    "preview:frontend": "npm run build --workspace frontend && npm run preview --workspace frontend"
+  }
+}
