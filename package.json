@@ -28,5 +28,9 @@
   "devDependencies": {
     "concurrently": "^9.2.0",
     "rimraf": "^6.0.1"
+  },
+  "dependencies": {
+    "mongoose": "^8.16.1",
+    "zod": "^3.25.67"
   }
 }

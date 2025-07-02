@@ -27,3 +27,6 @@ dist-ssr
 *.sln
 *.sw?
 .vercel
+
+# DELETE IT LATER
+INSTRUCTIONS.md
