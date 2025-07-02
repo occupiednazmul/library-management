@@ -17,11 +17,16 @@
   "scripts": {
     "dev:api": "npm run build:client && npm run dev --workspace api",
     "dev:client": "npm run dev --workspace client",
+    "dev": "concurrently \"npm run dev:api\" \"npm run dev:client\"",
     "build:api": "npm run build --workspace api",
     "build:client": "npm run build --workspace client",
     "build": "npm run build:client && npm run build:api",
-    "deploy": "vercel --prod",
-    "preview:api": "npm run build && node server",
-    "preview:client": "npm run build:client && npm run preview --workspace client"
+    "preview": "npm run build && node server",
+    "predeploy": "rimraf public server",
+    "deploy": "vercel --prod"
+  },
+  "devDependencies": {
+    "concurrently": "^9.2.0",
+    "rimraf": "^6.0.1"
   }
 }
