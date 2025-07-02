@@ -1,5 +1,5 @@
 // MODULE IMPORTS
-import { Router } from 'express'
+import { Request, Response, Router } from 'express'
 
 // LOCAL IMPORTS
 import bookRouter from './book.route.js'

@@ -10,7 +10,7 @@ const bookSchema = new Schema<TBook>(
     title: { type: String, required: true },
     author: { type: String, required: true },
     genre: { type: String, required: true, default: 'Uncategorized' },
-    isbn: { type: String, required: true },
+    isbn: { type: String, required: true, unique: true },
     description: { type: String, required: true },
     copies: { type: Number, required: true, min: 0 },
     available: { type: Boolean, required: true },

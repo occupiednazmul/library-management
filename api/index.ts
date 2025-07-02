@@ -4,15 +4,18 @@ import path from 'node:path'
 import express, { NextFunction, Request, Response } from 'express'
 
 // LOCAL IMPORTS
+import connectDb from './utilities/db.js'
 import rootRouter from './routes/root.route.js'
+import { globalErrorHandler, notFound } from './utilities/middlewares.js'
 
 // VARIABLES
 const port = process.env.PORT || 3000
+const dbURI = process.env.MONGODB_URI || ''
 const app = express()
 
 // LOGGER
 app.use(function (req: Request, res: Response, next: NextFunction) {
-  console.log(`${req.method} Request made to: ${req.url}`)
+  console.log(`Request made to: ${req.url}`)
   next()
 })
 
@@ -26,17 +29,12 @@ app.use(express.static(publicFolder))
 app.use(express.json()) // accepts all body as JSON
 app.use('/api', rootRouter) // all API routes are handled through this
 
-// NOT FOUND
-app.all('*', function (req: Request, res: Response) {
-  res.status(404).json({
-    success: false,
-    message: `Nothing found for: ${req.url}`,
-    error: {
-      name: 'NOT_FOUND',
-      message: `Nothing found for: ${req.url}`
-    }
-  })
-})
+// MIDDLEWARES
+app.use(globalErrorHandler)
+app.use(notFound)
+
+// CONNECT TO DATABASE
+await connectDb(dbURI)
 
 // RUN SERVER
 app.listen(port, function () {

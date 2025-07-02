@@ -7,7 +7,7 @@ const borrowRouter = Router()
 borrowRouter.get('/', function (req: Request, res: Response) {
   res.json({
     success: true,
-    message: `Fulfilling ${req.url}`,
+    message: `Fulfilling ${req.originalUrl}`,
     data: {},
     error: {}
   })
