@@ -12,16 +12,16 @@
   "private": "true",
   "workspaces": [
     "api",
-    "frontend"
+    "client"
   ],
   "scripts": {
-    "dev:api": "npm run dev --workspace api",
-    "dev:frontend": "npm run dev --workspace frontend",
+    "dev:api": "npm run build:client && npm run dev --workspace api",
+    "dev:client": "npm run dev --workspace client",
     "build:api": "npm run build --workspace api",
-    "build:frontend": "npm run build --workspace frontend",
-    "predeploy": "npm run build:frontend",
+    "build:client": "npm run build --workspace client",
+    "build": "npm run build:client && npm run build:api",
     "deploy": "vercel --prod",
-    "preview:api": "npm run build --workspace api && node server",
-    "preview:frontend": "npm run build --workspace frontend && npm run preview --workspace frontend"
+    "preview:api": "npm run build && node server",
+    "preview:client": "npm run build:client && npm run preview --workspace client"
   }
 }
