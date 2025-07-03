@@ -1,10 +1,10 @@
 // MODULE IMPORTS
 import { Request, Response, Router } from 'express'
-import { Schema, model } from 'mongoose'
+import { Schema, Types, model } from 'mongoose'
 import * as z from 'zod/v4'
-import { responseCodes } from '../index.js'
+import { responseCodes } from './index.js'
 
-// VALIDATION FOR BOOKS
+// VALIDATIONS
 const newBookValidation = z.strictObject({
   title: z.string(),
   author: z.string().transform(function (author) {
@@ -24,12 +24,22 @@ const newBookValidation = z.strictObject({
   copies: z.number().min(0),
   available: z.boolean(),
   imageURI: z.string().optional()
-})
+}) // book validation
 
-// BOOK DEFINITION
-type TBook = z.infer<typeof newBookValidation>
+const newBorrowValidation = z.strictObject({
+  quantity: z.number().min(1),
+  dueDate: z.date()
+}) // borrow validation
 
-// BOOK SCHEMA
+// DEFINITIONS
+type TBook = z.infer<typeof newBookValidation> // book definition
+
+type TBorrow = { bookId: Types.ObjectId } & Omit<
+  z.infer<typeof newBorrowValidation>,
+  'bookId'
+> // borrow definition
+
+// SCHEMAS
 const bookSchema = new Schema<TBook>(
   {
     title: { type: String, required: true },
@@ -42,10 +52,20 @@ const bookSchema = new Schema<TBook>(
     imageURI: { type: String }
   },
   { timestamps: true }
-)
+) // book schema
 
-// BOOK MODEL
-const MBook = model('Book', bookSchema)
+const borrowSchema = new Schema<TBorrow>(
+  {
+    bookId: { type: Schema.Types.ObjectId, required: true, ref: 'Book' },
+    quantity: { type: Number, required: true, min: 1 },
+    dueDate: { type: Date, required: true }
+  },
+  { timestamps: true }
+) // borrow schema
+
+// MODELS
+const MBook = model('Book', bookSchema) // book model
+const MBorrow = model('Borrow', borrowSchema) // borrow model
 
 // ROUTERS
 const bookRouter = Router()
@@ -101,16 +121,61 @@ bookRouter
     throw Error(responseCodes.METHOD_NOT_ALLOWED.toString())
   })
 
+// BORROW A BOOK
+bookRouter
+  .route('/:bookId/borrow')
+  .get(function (req: Request, res: Response) {
+    res.json({
+      success: true,
+      message: 'testing',
+      data: {
+        message: `building this route`
+      }
+    })
+  })
+  .put(async function (req: Request, res: Response) {
+    console.log(`BOOK_BORROW_REQUEST`, req.params)
+
+    res.status(201).json({
+      success: true,
+      message: 'testing',
+      data: {
+        message: `building this route`
+      }
+    })
+  })
+  .all(function (req: Request, res: Response) {
+    throw Error(responseCodes.METHOD_NOT_ALLOWED.toString())
+  })
+
 // GET BOOKS
 booksRouter
   .route('/')
   .get(async function (req: Request, res: Response) {
+    console.log(`BOOK_SEARCH_QUERIES`, req.query)
+
     const books = await MBook.find()
 
     res.json({
       success: true,
       message: `${books.length} book${books.length === 1 ? '' : 's'} found.`,
       data: books
+    })
+  })
+  .all(function (req: Request, res: Response) {
+    throw Error(responseCodes.METHOD_NOT_ALLOWED.toString())
+  })
+
+// GET BORROW SUMMARY
+booksRouter
+  .route('/borrow-summary')
+  .get(function (req: Request, res: Response) {
+    res.json({
+      success: true,
+      message: 'testing',
+      data: {
+        message: `building this route`
+      }
     })
   })
   .all(function (req: Request, res: Response) {

@@ -6,20 +6,20 @@ import { connect } from 'mongoose'
 import { ZodError } from 'zod/v4'
 
 // ROUTER IMPORTS
-import { bookRouter, booksRouter } from './routes/books.routes.js'
-import { borrowRouter, userRouter } from './routes/borrow.routes.js'
+import { bookRouter, booksRouter } from './routes.js'
 
 // VARIABLES
-const port = process.env.PORT || 3000
-const dbURI = process.env.MONGODB_URI || ''
-const app = express()
+const port = process.env.PORT || 3000 // server port
+const dbURI = process.env.MONGODB_URI || '' // database uri
 export const responseCodes = {
   BAD_REQUEST: 400,
   NOT_FOUND: 404,
   METHOD_NOT_ALLOWED: 405,
   CONFLICT: 409,
   INTERNAL_SERVER_ERROR: 500
-}
+} // http response codes
+
+const app = express() // initialize app
 
 // LOGGER
 app.use(function (req: Request, res: Response, next: NextFunction) {
@@ -31,14 +31,13 @@ app.use(function (req: Request, res: Response, next: NextFunction) {
 const thisDirectory = path.dirname(fileURLToPath(import.meta.url))
 const publicFolder = path.resolve(thisDirectory, '..', 'public')
 
-app.use(express.static(publicFolder))
+app.use(express.static(publicFolder)) // serve static files
 
 // ROUTES
 app.use(express.json()) // accepts all body as JSON
+
 app.use('/api/book', bookRouter)
 app.use('/api/books', booksRouter)
-app.use('/api/borrow', borrowRouter)
-app.use('/api/user', userRouter)
 
 // GLOBAL ERROR HANDLER
 app.use(function (
