@@ -30,8 +30,8 @@ const borrowSchema = new Schema<TBorrow>(
 const MBorrow = model('Borrow', borrowSchema)
 
 // ROUTERS
-const userRouter = Router()
 const borrowRouter = Router()
+const userRouter = Router()
 
 // EXPORT ROUTES
-export { userRouter }
+export { borrowRouter, userRouter }
