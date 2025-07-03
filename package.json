@@ -21,7 +21,7 @@
     "build:api": "npm run build --workspace api",
     "build:client": "npm run build --workspace client",
     "build": "npm run build:client && npm run build:api",
-    "preview": "npm run build && node server",
+    "preview": "npm run build && node api",
     "predeploy": "rimraf public server",
     "deploy": "vercel --prod"
   },
