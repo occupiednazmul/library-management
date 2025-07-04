@@ -1,5 +1,9 @@
-import { model, Schema, Types } from 'mongoose'
+// MODULE IMPORTS
+import { ClientSession, model, Model, Schema, Types } from 'mongoose'
 import { z } from 'zod/v4'
+
+// LOCAL IMPORTS
+import { responseCodes } from '../utilities/global.handlers.js'
 
 // BOOK VALIDATION
 export const bookDataValidation = z.strictObject({
@@ -86,8 +90,17 @@ export type TBook = z.infer<typeof bookDataValidation>
 // FILTER TYPE
 export type TFilter = z.infer<typeof bookFiltersValidation>
 
+// TYPE EXTENSION FOR STATICS
+interface BookModelStatics extends Model<TBook> {
+  decrementCopies(
+    bookId: Types.ObjectId | string,
+    quantity: number,
+    session?: ClientSession
+  ): Promise<void>
+}
+
 // BOOK SCHEMA
-const bookSchema = new Schema<TBook>(
+const bookSchema = new Schema<TBook, BookModelStatics>(
   {
     title: { type: String, required: true },
     author: { type: String, required: true },
@@ -112,7 +125,33 @@ const bookSchema = new Schema<TBook>(
     imageURI: { type: String }
   },
   {
-    timestamps: true
+    timestamps: true,
+    statics: {
+      async decrementCopies(bookId, quantity, session) {
+        const bookToUpdate = await this.findById(bookId)
+
+        if (!bookToUpdate) {
+          throw {
+            code: responseCodes.NOT_FOUND,
+            message: `Book with bookId: ${bookId} not found!`
+          }
+        }
+
+        if (bookToUpdate.copies < quantity) {
+          throw {
+            code: responseCodes.BAD_REQUEST,
+            message: `Book with bookId: ${bookId} doesn't have ${quantity} ${
+              quantity === 1 ? 'copy' : 'copies'
+            }!`
+          }
+        }
+
+        bookToUpdate.copies -= quantity
+        bookToUpdate.available = bookToUpdate.copies > 0
+
+        await bookToUpdate.save()
+      }
+    }
   }
 )
 
@@ -129,4 +168,4 @@ bookSchema.pre('findOneAndUpdate', function (next) {
 })
 
 // BOOK MODEL
-export const MBook = model('Book', bookSchema)
+export const MBook = model<TBook, BookModelStatics>('Book', bookSchema)

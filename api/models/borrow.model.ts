@@ -5,19 +5,21 @@ import { z } from 'zod/v4'
 export const borrowDataValidation = z.strictObject({
   book: z.string(),
   quantity: z.number().min(1),
-  dueDate: z.date()
+  dueDate: z.string().transform(function (val) {
+    return new Date(val)
+  })
 })
 
 // BORROW TYPE
-type TBorrow = { bookId: Types.ObjectId } & Omit<
+export type TBorrow = { book: Types.ObjectId } & Omit<
   z.infer<typeof borrowDataValidation>,
-  'bookId'
+  'book'
 >
 
 // BORROW SCHEMA
 const borrowSchema = new Schema<TBorrow>(
   {
-    bookId: { type: Schema.Types.ObjectId, required: true, ref: 'Book' },
+    book: { type: Schema.Types.ObjectId, required: true, ref: 'Book' },
     quantity: { type: Number, required: true, min: 1 },
     dueDate: { type: Date, required: true }
   },
