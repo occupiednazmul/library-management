@@ -43,7 +43,18 @@ app.use(notFoundHandler)
 // CONNECT TO DATABASE
 await (async function () {
   try {
-    await connect(dbURI /*, { autoIndex: false }*/)
+    console.log(
+      process.env.ENV === 'production' ||
+        process.env.VERCEL_ENV === 'production'
+        ? 'Database is inside PRODUCTION deployment, AUTO INDEXING TURNED OFF.'
+        : 'Database is NOT inside PRODUCTION deployment, AUTO INDEXING TURNED ON.'
+    )
+
+    await connect(dbURI, {
+      autoIndex:
+        process.env.ENV === 'production' ||
+        process.env.VERCEL_ENV === 'production'
+    })
 
     console.log(`Connected to MongoDB...`)
   } catch (e) {
