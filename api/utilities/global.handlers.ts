@@ -2,6 +2,7 @@ import { NextFunction, Request, Response } from 'express'
 import { ZodError } from 'zod/v4'
 
 export const responseCodes = {
+  CREATED: 201,
   BAD_REQUEST: 400,
   NOT_FOUND: 404,
   METHOD_NOT_ALLOWED: 405,
@@ -9,8 +10,14 @@ export const responseCodes = {
   INTERNAL_SERVER_ERROR: 500
 } // http response codes
 
+export type ControllerError = Error & {
+  name?: string
+  code?: number
+  message?: string
+}
+
 export function globalErrorHandler(
-  err: Error,
+  err: ControllerError,
   req: Request,
   res: Response,
   next: NextFunction
@@ -26,8 +33,8 @@ export function globalErrorHandler(
     if ((err as any).code === 11000) {
       res.status(responseCodes.CONFLICT).json({
         success: false,
-        message: `Duplicate data found.`,
-        error: err.message
+        message: `Duplicate data found!`,
+        error: err.message || `Data already exists!`
       })
 
       return
@@ -77,12 +84,24 @@ export function globalErrorHandler(
     return
   }
 
-  if (err.message === responseCodes.BAD_REQUEST.toString()) {
-    res.status(responseCodes.METHOD_NOT_ALLOWED).json({
+  if (err.code === responseCodes.NOT_FOUND) {
+    res.status(responseCodes.NOT_FOUND).json({
       success: false,
-      message: `BAD REQUEST`,
+      message: err.message || `Content not found!`,
       error: {
-        message: `BAD REQUEST`
+        message: err.message || `Content not found!`
+      }
+    })
+
+    return
+  }
+
+  if (err.code === responseCodes.BAD_REQUEST) {
+    res.status(responseCodes.BAD_REQUEST).json({
+      success: false,
+      message: err.message || `BAD REQUEST`,
+      error: {
+        message: err.message || `BAD REQUEST`
       }
     })
 
