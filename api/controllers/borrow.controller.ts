@@ -90,7 +90,6 @@ borrowRouter
         })
       })
     } catch (error) {
-      await session.abortTransaction()
       next(error)
     } finally {
       session.endSession()

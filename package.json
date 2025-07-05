@@ -1,6 +1,6 @@
 {
   "name": "library-management",
-  "version": "0.0.12",
+  "version": "0.0.13",
   "description": "A library management app.",
   "keywords": [
     "library",
@@ -16,7 +16,7 @@
   ],
   "scripts": {
     "dev:api": "npm run build:client && npm run dev --workspace api",
-    "dev:client": "npm run dev --workspace client",
+    "dev:client": "concurrently \"npm run dev --workspace api\" \"npm run dev --workspace client\"",
     "dev": "concurrently \"npm run dev:api\" \"npm run dev:client\"",
     "build:api": "npm run build --workspace api",
     "build:client": "npm run build --workspace client",
