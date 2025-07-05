@@ -3,12 +3,7 @@ import { createBrowserRouter } from 'react-router'
 
 // LOCAL IMPORTS
 import App from './App'
-import {
-  BookList,
-  CreateABook,
-  GetABook,
-  GetBooks
-} from './components/pages/books'
+import { CreateABook, GetABook, GetBooks } from './components/pages/books'
 import { BorrowABook, BorrowSummary } from './components/pages/borrow'
 
 // ROUTER

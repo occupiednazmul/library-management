@@ -2,7 +2,7 @@
 import { Outlet } from 'react-router'
 
 // GET A LIST OF BOOKS
-export function BookList() {
+function BookList() {
   return <h1 className='font-bold'>Get Books</h1>
 }
 

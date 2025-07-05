@@ -15,5 +15,9 @@ export default defineConfig({
       '@ui': path.resolve(__dirname, './src/components/ui'),
       '@validations': path.resolve(__dirname, './src/validations')
     }
+  },
+  build: {
+    outDir: '../public',
+    emptyOutDir: true
   }
 })
