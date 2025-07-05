@@ -7,13 +7,6 @@
     "module": "ESNext",
     "skipLibCheck": true,
 
-    /* shadcn ui configuration */
-    "baseUrl": ".",
-    "forceConsistentCasingInFileNames": true,
-    "paths": {
-      "@/*": ["./src/*"]
-    },
-
     /* Bundler mode */
     "moduleResolution": "bundler",
     "allowImportingTsExtensions": true,

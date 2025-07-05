@@ -6,8 +6,17 @@
     "module": "ESNext",
     "skipLibCheck": true,
 
-    /* shadcn ui configuration */
+    /* shadcn ui */
+    "baseUrl": ".",
     "forceConsistentCasingInFileNames": true,
+    "paths": {
+      "@/*": ["./src/*"],
+      "@assets/*": ["./src/assets/*"],
+      "@components/*": ["./src/components/*"],
+      "@lib/*": ["./src/lib/*"],
+      "@ui/*": ["./src/components/ui/*"],
+      "@validations/*": ["./src/validations/*"]
+    },
 
     /* Bundler mode */
     "moduleResolution": "bundler",

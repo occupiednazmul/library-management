@@ -6,17 +6,14 @@ import tailwindcss from '@tailwindcss/vite'
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [react(), tailwindcss()],
-  build: {
-    outDir: '../public',
-    emptyOutDir: true
-  },
   resolve: {
     alias: {
-      '@': path.resolve(__dirname, 'src'),
-      '@ui': path.resolve(__dirname, 'src/app/components/ui'),
-      '@components': path.resolve(__dirname, 'src/app/components'),
-      '@lib': path.resolve(__dirname, 'src/lib'),
-      '@hooks': path.resolve(__dirname, 'src/app/hooks')
+      '@': path.resolve(__dirname, './src'),
+      '@assets': path.resolve(__dirname, './src/assets'),
+      '@components': path.resolve(__dirname, './src/components'),
+      '@lib': path.resolve(__dirname, './src/lib'),
+      '@ui': path.resolve(__dirname, './src/components/ui'),
+      '@validations': path.resolve(__dirname, './src/validations')
     }
   }
 })
