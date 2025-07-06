@@ -6,7 +6,6 @@
   ],
   "compilerOptions": {
     "baseUrl": ".",
-    "forceConsistentCasingInFileNames": true,
     "paths": {
       "@/*": ["./src/*"],
       "@assets/*": ["./src/assets/*"],
@@ -14,7 +13,6 @@
       "@lib/*": ["./src/lib/*"],
       "@ui/*": ["./src/components/ui/*"],
       "@validations/*": ["./src/validations/*"]
-    },
-    "strict": true
+    }
   }
 }

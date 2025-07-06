@@ -8,7 +8,6 @@
 
     /* shadcn ui */
     "baseUrl": ".",
-    "forceConsistentCasingInFileNames": true,
     "paths": {
       "@/*": ["./src/*"],
       "@assets/*": ["./src/assets/*"],

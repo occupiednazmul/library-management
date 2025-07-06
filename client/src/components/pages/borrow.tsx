@@ -1,6 +1,6 @@
 export function BorrowABook() {
   return (
-    <div className='w-screen h-screen flex justify-center-safe items-center-safe gap-2'>
+    <div className='w-full p-16 flex justify-center-safe items-center-safe gap-2'>
       <img
         src='/libmgt.png'
         alt='Library Management App Icon'
@@ -14,7 +14,7 @@ export function BorrowABook() {
 
 export function BorrowSummary() {
   return (
-    <div className='w-screen h-screen flex justify-center-safe items-center-safe gap-2'>
+    <div className='w-full p-16 flex justify-center-safe items-center-safe gap-2'>
       <img
         src='/libmgt.png'
         alt='Library Management App Icon'

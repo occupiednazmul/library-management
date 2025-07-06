@@ -4,7 +4,7 @@ import { createRoot } from 'react-dom/client'
 import { RouterProvider } from 'react-router'
 
 // LOCAL IMPORTS
-import '@/index.css'
+import './index.css'
 import router from './router'
 
 // ROOT ELEMENT

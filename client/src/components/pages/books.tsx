@@ -14,13 +14,7 @@ export function GetABook() {
 // BOOKS PAGE
 export function GetBooks() {
   return (
-    <div className='w-screen h-screen flex justify-center-safe items-center-safe gap-2'>
-      <img
-        src='/libmgt.png'
-        alt='Library Management App Icon'
-        width={80}
-        height={80}
-      />
+    <div className='w-full p-16 flex justify-center-safe items-center-safe gap-2'>
       <BookList />
       <Outlet />
     </div>
@@ -30,7 +24,7 @@ export function GetBooks() {
 // CREATE A BOOK
 export function CreateABook() {
   return (
-    <div className='w-screen h-screen flex justify-center-safe items-center-safe gap-2'>
+    <div className='w-full p-16 flex justify-center-safe items-center-safe gap-2'>
       <img
         src='/libmgt.png'
         alt='Library Management App Icon'
@@ -45,7 +39,7 @@ export function CreateABook() {
 // EDIT A BOOK
 export function EditABook() {
   return (
-    <div className='w-screen h-screen flex justify-center-safe items-center-safe gap-2'>
+    <div className='w-full p-16 flex justify-center-safe items-center-safe gap-2'>
       <img
         src='/libmgt.png'
         alt='Library Management App Icon'

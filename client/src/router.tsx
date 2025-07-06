@@ -5,34 +5,41 @@ import { createBrowserRouter } from 'react-router'
 import App from './App'
 import { CreateABook, GetABook, GetBooks } from './components/pages/books'
 import { BorrowABook, BorrowSummary } from './components/pages/borrow'
+import Home from './components/pages/home'
 
 // ROUTER
 const router = createBrowserRouter([
   {
     path: '/',
-    element: <App />
-  },
-  {
-    path: 'books',
-    element: <GetBooks />,
+    element: <App />,
     children: [
       {
-        path: ':id',
-        element: <GetABook />
+        path: '/',
+        element: <Home />
+      },
+      {
+        path: 'books',
+        element: <GetBooks />,
+        children: [
+          {
+            path: ':id',
+            element: <GetABook />
+          }
+        ]
+      },
+      {
+        path: 'create-book',
+        element: <CreateABook />
+      },
+      {
+        path: 'borrow/:bookId',
+        element: <BorrowABook />
+      },
+      {
+        path: 'borrow-summary',
+        element: <BorrowSummary />
       }
     ]
-  },
-  {
-    path: 'create-book',
-    element: <CreateABook />
-  },
-  {
-    path: 'borrow/:bookId',
-    element: <BorrowABook />
-  },
-  {
-    path: 'borrow-summary',
-    element: <BorrowSummary />
   }
 ])
 
