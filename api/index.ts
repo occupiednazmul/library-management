@@ -2,6 +2,7 @@
 import { fileURLToPath } from 'node:url'
 import path from 'node:path'
 import express, { NextFunction, Request, Response } from 'express'
+import cors from 'cors'
 import { connect } from 'mongoose'
 
 // ROUTER IMPORTS
@@ -17,6 +18,19 @@ const port = process.env.PORT || 3000 // server port
 const dbURI = process.env.MONGODB_URI || '' // database uri
 
 const app = express() // initialize app
+
+// CORS
+if (
+  process.env.VERCEL_ENV !== 'production' ||
+  process.env.ENV !== 'production'
+) {
+  app.use(
+    cors({
+      origin: true, // Allow all origins
+      credentials: true
+    })
+  )
+}
 
 // LOGGER
 app.use(function (req: Request, res: Response, next: NextFunction) {
