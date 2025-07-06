@@ -1,6 +1,7 @@
 // MODULE IMPORTS
 import { z } from 'zod/v4'
 
+// GENRES
 export const genres = [
   'Fiction',
   'Non-fiction',
@@ -43,3 +44,9 @@ export const bookDataValidation = z.strictObject({
   available: z.coerce.boolean(),
   imageURI: z.string().optional()
 })
+
+// NEW BOOK TYPE
+export type TBookNew = z.infer<typeof bookDataValidation>
+
+// UPDATE BOOK TYPE
+export type TBookUpdate = Partial<z.infer<typeof bookDataValidation>>

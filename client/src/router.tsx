@@ -3,7 +3,12 @@ import { createBrowserRouter } from 'react-router'
 
 // LOCAL IMPORTS
 import App from './App'
-import { CreateABook, GetABook, GetBooks } from './components/pages/books'
+import {
+  CreateABook,
+  EditABook,
+  GetABook,
+  GetBooks
+} from './components/pages/books'
 import { BorrowABook, BorrowSummary } from './components/pages/borrow'
 import Home from './components/pages/home'
 
@@ -30,6 +35,10 @@ const router = createBrowserRouter([
       {
         path: 'create-book',
         element: <CreateABook />
+      },
+      {
+        path: 'edit-book/:id',
+        element: <EditABook />
       },
       {
         path: 'borrow/:bookId',
