@@ -56,7 +56,7 @@ booksRouter
     }
 
     try {
-      const bookCreated = (await MBook.create(newBook.data)) as TBook
+      const [bookCreated] = await MBook.create([newBook.data])
 
       res.status(responseCodes.CREATED).json({
         success: true,

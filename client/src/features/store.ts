@@ -4,14 +4,19 @@ import { setupListeners } from '@reduxjs/toolkit/query'
 
 // LOCAL IMPORTS
 import { booksApi } from './booksQuery'
+import { borrowApi } from './borrowQuery'
 
 // REDUX STORE
 const store = configureStore({
   reducer: {
-    [booksApi.reducerPath]: booksApi.reducer
+    [booksApi.reducerPath]: booksApi.reducer,
+    [borrowApi.reducerPath]: borrowApi.reducer
   },
   middleware: function (getDefaultMiddleware) {
-    return getDefaultMiddleware().concat(booksApi.middleware)
+    return getDefaultMiddleware().concat(
+      booksApi.middleware,
+      borrowApi.middleware
+    )
   }
 })
 

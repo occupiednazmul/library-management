@@ -12,7 +12,7 @@ type TBookDb = TBookNew & {
 }
 
 // API RESPONSE TYPE
-type TServerResponse<T> = {
+type TBookResponse<T> = {
   success: boolean
   message: string
   data?: T
@@ -22,15 +22,20 @@ type TServerResponse<T> = {
 // API SLICES
 export const booksApi = createApi({
   reducerPath: 'booksApi',
-  baseQuery: fetchBaseQuery({ baseUrl: 'http://localhost:3000/api/' }),
+  baseQuery: fetchBaseQuery({
+    baseUrl:
+      import.meta.env.VERCEL_ENV === 'production'
+        ? '/api/'
+        : 'http://localhost:3000/api/'
+  }),
   tagTypes: ['Books'],
   endpoints: function (builder) {
     return {
-      getBook: builder.query<TServerResponse<TBookDb>, string>({
+      getBook: builder.query<TBookResponse<TBookDb>, string>({
         query: function (id) {
           return `books/${id}`
         },
-        providesTags: function (result, error, id) {
+        providesTags: function (_, __, id) {
           return [{ type: 'Books', id }]
         }
       }),
@@ -40,20 +45,20 @@ export const booksApi = createApi({
         },
         providesTags: ['Books']
       }),
-      createBook: builder.mutation<TServerResponse<TBookDb>, TBookUpdate>({
+      createBook: builder.mutation<TBookResponse<TBookDb>, TBookUpdate>({
         query: function (newBook) {
           return { url: 'books', method: 'POST', body: newBook }
         },
         invalidatesTags: ['Books']
       }),
       updateBook: builder.mutation<
-        TServerResponse<TBookDb>,
+        TBookResponse<TBookDb>,
         { id: string; updatedBook: TBookUpdate }
       >({
         query: function ({ id, updatedBook }) {
           return { url: `books/${id}`, method: 'PUT', body: updatedBook }
         },
-        invalidatesTags: function (result, error, { id }) {
+        invalidatesTags: function (_, __, { id }) {
           return [{ type: 'Books', id }]
         }
       })
@@ -61,6 +66,7 @@ export const booksApi = createApi({
   }
 })
 
+// EXPORTS
 export const {
   useGetBookQuery,
   useGetBooksQuery,

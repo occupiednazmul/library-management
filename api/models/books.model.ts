@@ -149,7 +149,7 @@ const bookSchema = new Schema<TBook, BookModelStatics>(
         bookToUpdate.copies -= quantity
         bookToUpdate.available = bookToUpdate.copies > 0
 
-        await bookToUpdate.save()
+        await bookToUpdate.save({ session })
       }
     }
   }

@@ -46,7 +46,10 @@ export const bookDataValidation = z.strictObject({
 })
 
 // NEW BOOK TYPE
-export type TBookNew = z.infer<typeof bookDataValidation>
+export type TBookNew = Omit<
+  z.infer<typeof bookDataValidation>,
+  'copies' | 'available'
+> & { copies: unknown; available: unknown }
 
 // UPDATE BOOK TYPE
-export type TBookUpdate = Partial<z.infer<typeof bookDataValidation>>
+export type TBookUpdate = Partial<TBookNew>

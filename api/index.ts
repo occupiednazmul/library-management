@@ -21,6 +21,17 @@ const app = express() // initialize app
 
 // CORS
 if (
+  process.env.VERCEL_ENV === 'development' ||
+  process.env.NODE_ENV === 'development' ||
+  process.env.ENV === 'development'
+) {
+  app.use(
+    cors({
+      origin: `http://localhost:${port}`,
+      credentials: true
+    })
+  )
+} else if (
   process.env.VERCEL_ENV !== 'production' ||
   process.env.ENV !== 'production'
 ) {

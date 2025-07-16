@@ -70,23 +70,21 @@ borrowRouter
     const session = await startSession()
 
     try {
-      let borrowRecord: TBorrow
-
       await session.withTransaction(async () => {
-        const { book, quantity, dueDate } = borrowData.data
-
-        const created = await MBorrow.create([{ book, quantity, dueDate }], {
+        const [borrowed] = await MBorrow.create([{ ...borrowData.data }], {
           session
         })
 
-        borrowRecord = created[0] as TBorrow
-
-        await MBook.decrementCopies(book, quantity, session)
+        await MBook.decrementCopies(
+          borrowData.data.book,
+          borrowData.data.quantity,
+          session
+        )
 
         res.status(responseCodes.CREATED).json({
           success: true,
-          message: `New borrow recorded. Deadline is: ${borrowRecord!.dueDate.toDateString()}`,
-          data: borrowRecord
+          message: `New borrow recorded. Deadline is: ${borrowed!.dueDate.toDateString()}`,
+          data: borrowed
         })
       })
     } catch (error) {
