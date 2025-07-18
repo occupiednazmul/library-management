@@ -13,7 +13,9 @@ import {
 } from '../../validations/borrow.validation'
 import {
   useBorrowBookMutation,
-  type TBorrowResponse
+  useBorrowSummaryQuery,
+  type TBorrowResponse,
+  type TBorrowSummary
 } from '../../features/borrowQuery'
 import {
   Form,
@@ -75,20 +77,21 @@ export function BorrowABook() {
             Borrow a Book
           </span>
         </h1>
-
-        {isError ? (
-          <h2 className='mb-6 font-medium text-sm text-destructive'>
-            {
-              (error as { status: number; data: TBorrowResponse<TBorrow> }).data
-                .message
-            }
-          </h2>
-        ) : (
-          <h2 className='mb-6 font-light text-sm'>
-            Borrowing book with id:{' '}
-            <span className='font-medium text-indigo-500'>{bookId}</span>
-          </h2>
-        )}
+        <h2
+          className={`mb-6 font-medium text-sm${
+            isError || ' text-destructive'
+          }`}
+        >
+          {isError ? (
+            (error as { status: number; data: TBorrowResponse<TBorrow> }).data
+              .message
+          ) : (
+            <>
+              Borrowing book with id:{' '}
+              <span className='font-medium text-indigo-500'>{bookId}</span>
+            </>
+          )}
+        </h2>
       </div>
       <Form {...borrowForm}>
         <form
@@ -192,15 +195,63 @@ export function BorrowABook() {
 }
 
 export function BorrowSummary() {
+  const { data, isSuccess, isLoading, isError, error } = useBorrowSummaryQuery()
+
   return (
-    <div className='w-full p-16 flex justify-center-safe items-center-safe gap-2'>
-      <img
-        src='/libmgt.png'
-        alt='Library Management App Icon'
-        width={80}
-        height={80}
-      />
-      <h1 className='font-bold'>Library Management App</h1>
-    </div>
+    <main className='w-full max-w-xl mx-auto font-semibold'>
+      <div>
+        <h1 className='mb-6 text-2xl sm:text-4xl'>
+          <span className='px-6 py-2 bg-indigo-200 rounded-md'>
+            Borrow Summary
+          </span>
+        </h1>
+        <h2
+          className={`mb-6 font-medium text-sm${
+            isLoading ? ' text-accent' : isError ? ' text-destructive' : ''
+          }`}
+        >
+          {isLoading
+            ? 'Data Loading...'
+            : isError
+            ? (error as { status: number; data: TBorrowSummary }).data.message
+            : (data as TBorrowSummary).message}
+        </h2>
+      </div>
+      <div className='grid gap-4'>
+        {isLoading ? (
+          <p>Data is loading...</p>
+        ) : isSuccess ? (
+          <>
+            {data.data?.map(function (borrowedBook) {
+              return (
+                <div
+                  className='border-1 p-2'
+                  key={borrowedBook.book.isbn}
+                >
+                  <p>
+                    <span className='font-bold'>Book:</span>{' '}
+                    {borrowedBook.book.title}
+                  </p>
+                  <p>
+                    <span className='font-bold'>ISBN:</span>{' '}
+                    {borrowedBook.book.isbn}
+                  </p>
+                  <p>
+                    <span className='font-bold'>Quantity:</span>{' '}
+                    {borrowedBook.totalQuantity}
+                  </p>
+                  <p>
+                    <span className='font-bold'>Image:</span>{' '}
+                    {borrowedBook.book.imageURI}
+                  </p>
+                </div>
+              )
+            })}
+          </>
+        ) : (
+          <p>No data to show</p>
+        )}
+      </div>
+    </main>
   )
 }

@@ -38,11 +38,17 @@ borrowRouter
           $unwind: '$bookInfo'
         },
         {
+          $sort: {
+            'bookInfo.updatedAt': -1
+          }
+        },
+        {
           $project: {
             _id: 0,
             book: {
               title: '$bookInfo.title',
-              isbn: '$bookInfo.isbn'
+              isbn: '$bookInfo.isbn',
+              imageURI: '$bookInfo.imageURI'
             },
             totalQuantity: 1
           }

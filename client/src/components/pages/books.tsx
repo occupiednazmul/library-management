@@ -32,7 +32,9 @@ import { Textarea } from '../ui/textarea'
 import { Button } from '../ui/button'
 import {
   useCreateBookMutation,
-  useUpdateBookMutation
+  useUpdateBookMutation,
+  type TBookDb,
+  type TBookResponse
 } from '../../features/booksQuery'
 
 // GET A LIST OF BOOKS
@@ -375,7 +377,8 @@ export function EditABook() {
     resolver: zodResolver(bookDataValidation.partial())
   })
 
-  const [updateBook, { isLoading, isSuccess }] = useUpdateBookMutation()
+  const [updateBook, { isLoading, isSuccess, isError, error }] =
+    useUpdateBookMutation()
 
   const navigate = useNavigate()
 
@@ -411,9 +414,20 @@ export function EditABook() {
             Update a Book
           </span>
         </h1>
-        <h2 className='mb-6 font-light text-sm'>
-          Updating book with id:{' '}
-          <span className='font-medium text-indigo-500'>{id}</span>
+        <h2
+          className={`mb-6 font-medium text-sm${
+            isError || ' text-destructive'
+          }`}
+        >
+          {isError ? (
+            (error as { status: number; data: TBookResponse<TBookDb> }).data
+              .message
+          ) : (
+            <>
+              Updating book with id:{' '}
+              <span className='font-medium text-indigo-500'>{id}</span>
+            </>
+          )}
         </h2>
       </div>
       <Form {...updatedBook}>

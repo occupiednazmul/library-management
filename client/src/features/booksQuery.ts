@@ -5,14 +5,14 @@ import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react'
 import type { TBookNew, TBookUpdate } from '../validations/books.validations'
 
 // DATABASE BOOK TYPE
-type TBookDb = TBookNew & {
+export type TBookDb = TBookNew & {
   _id: string
   createdAt: string
   updatedAt: string
 }
 
 // API RESPONSE TYPE
-type TBookResponse<T> = {
+export type TBookResponse<T> = {
   success: boolean
   message: string
   data?: T
