@@ -1,16 +1,31 @@
 // MODULE IMPORTS
+import { lazy, Suspense } from 'react'
 import { createBrowserRouter } from 'react-router'
 
 // LOCAL IMPORTS
 import App from './App'
-import {
-  CreateABook,
-  EditABook,
-  GetABook,
-  GetBooks
-} from './components/pages/books'
-import { BorrowABook, BorrowSummary } from './components/pages/borrow'
 import Home from './components/pages/home'
+import Loader from './components/elements/loader'
+
+// LAZY IMPORTS
+const BorrowABook = lazy(function () {
+  return import('./components/pages/borrowABook')
+})
+const BorrowSummary = lazy(function () {
+  return import('./components/pages/borrowSummary')
+})
+const CreateABook = lazy(function () {
+  return import('./components/pages/createBook')
+})
+const EditABook = lazy(function () {
+  return import('./components/pages/editBook')
+})
+const GetBooks = lazy(function () {
+  return import('./components/pages/getBooks')
+})
+const GetABook = lazy(function () {
+  return import('./components/pages/getABook')
+})
 
 // ROUTER
 const router = createBrowserRouter([
@@ -24,29 +39,53 @@ const router = createBrowserRouter([
       },
       {
         path: 'books',
-        element: <GetBooks />,
+        element: (
+          <Suspense fallback={<Loader />}>
+            <GetBooks />
+          </Suspense>
+        ),
         children: [
           {
             path: ':id',
-            element: <GetABook />
+            element: (
+              <Suspense fallback={<Loader />}>
+                <GetABook />
+              </Suspense>
+            )
           }
         ]
       },
       {
         path: 'create-book',
-        element: <CreateABook />
+        element: (
+          <Suspense fallback={<Loader />}>
+            <CreateABook />
+          </Suspense>
+        )
       },
       {
         path: 'edit-book/:id',
-        element: <EditABook />
+        element: (
+          <Suspense fallback={<Loader />}>
+            <EditABook />
+          </Suspense>
+        )
       },
       {
         path: 'borrow/:bookId',
-        element: <BorrowABook />
+        element: (
+          <Suspense fallback={<Loader />}>
+            <BorrowABook />
+          </Suspense>
+        )
       },
       {
         path: 'borrow-summary',
-        element: <BorrowSummary />
+        element: (
+          <Suspense fallback={<Loader />}>
+            <BorrowSummary />
+          </Suspense>
+        )
       }
     ]
   }

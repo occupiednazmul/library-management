@@ -13,12 +13,12 @@ export type TBorrowResponse<T> = {
   error?: unknown
 }
 
-export type TBorrowSummary = TBorrowResponse<
-  Array<{
-    totalQuantity: number
-    book: Pick<TBookNew, 'title' | 'isbn' | 'imageURI'>
-  }>
->
+export type TBorrowedBook = {
+  totalQuantity: number
+  book: Pick<TBookNew, 'title' | 'isbn' | 'imageURI'>
+}
+
+export type TBorrowSummary = TBorrowResponse<Array<TBorrowedBook>>
 
 // API SLICES
 export const borrowApi = createApi({
