@@ -65,9 +65,9 @@ export default function EditABook() {
   )
 
   return (
-    <main className='w-full max-w-xl mx-auto font-semibold'>
+    <main className='w-full max-w-xl mx-auto'>
       <div>
-        <h1 className='mb-6 text-2xl sm:text-4xl'>
+        <h1 className='mb-6 text-2xl sm:text-4xl font-semibold'>
           <span className='px-6 py-2 bg-indigo-200 rounded-md'>
             Update a Book
           </span>

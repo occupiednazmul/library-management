@@ -10,9 +10,9 @@ export default function BorrowSummary() {
   const { data, isSuccess, isLoading, isError, error } = useBorrowSummaryQuery()
 
   return (
-    <main className='w-full max-w-7xl mx-auto font-semibold'>
+    <main className='w-full max-w-7xl mx-auto'>
       <div>
-        <h1 className='mb-6 text-2xl sm:text-4xl'>
+        <h1 className='mb-6 text-2xl sm:text-4xl font-semibold'>
           <span className='px-6 py-2 bg-indigo-200 rounded-md'>
             Borrow Summary
           </span>
@@ -60,7 +60,7 @@ export default function BorrowSummary() {
                       <p className='mb-4'>
                         <span>Book:</span>
                         <br />
-                        <span className='font-bold text-4xl'>
+                        <span className='font-bold text-2xl sm:text-4xl'>
                           {borrowedBook.book.title}
                         </span>
                       </p>

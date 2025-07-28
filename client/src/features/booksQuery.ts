@@ -39,7 +39,7 @@ export const booksApi = createApi({
           return [{ type: 'Books', id }]
         }
       }),
-      getBooks: builder.query<TBookNew, void>({
+      getBooks: builder.query<TBookResponse<Array<TBookDb>>, void>({
         query: function () {
           return 'books'
         },
