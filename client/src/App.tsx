@@ -7,7 +7,7 @@ import { LibraryBig, Plus, Table } from 'lucide-react'
 export default function App() {
   return (
     <>
-      <header className='w-full fixed top-0 left-0 bg-white shadow-md shadow-indigo-50'>
+      <header className='w-full fixed top-0 left-0 bg-white shadow-md shadow-indigo-50 z-40'>
         <nav className='max-w-7xl mx-auto flex justify-between items-center'>
           <NavLink
             to='/'
@@ -23,7 +23,7 @@ export default function App() {
               Library Management App
             </p>
           </NavLink>
-          <div className='w-full md:w-auto bg-white md:bg-transparent fixed md:static left-0 md:left-auto bottom-0 md:bottom-auto p-2 md:p-0 flex justify-around items-center gap-6 shadow-2xl md:shadow-none shadow-indigo-400 *:text-center *:sm:text-lef *:rounded-md *:sm:rounded-sm *:px-4 *:py-2 *:sm:py-4  *:md:py-2 *:w-full *:md:w-auto *:flex *:flex-col *:sm:flex-row *:items-center *:sm:justify-center *:gap-1'>
+          <div className='w-full md:w-auto bg-white md:bg-transparent fixed md:static left-0 md:left-auto bottom-0 md:bottom-auto p-2 md:p-0 flex justify-around items-center gap-6 shadow-2xl md:shadow-none shadow-indigo-400 *:text-center *:sm:text-lef *:rounded-md *:sm:rounded-sm *:px-4 *:py-2 *:sm:py-4  *:md:py-2 *:w-full *:md:w-auto *:flex *:flex-col *:sm:flex-row *:items-center *:sm:justify-center *:gap-1 z-50'>
             <NavigationItem
               path={`/create-book`}
               icon={<Plus className='w-5 h-5' />}
