@@ -1,6 +1,12 @@
 // MODULE IMPORTS
 import { useEffect, useState, type Dispatch, type SetStateAction } from 'react'
-import { Link, Outlet, useParams, useSearchParams } from 'react-router'
+import {
+  Link,
+  Outlet,
+  useNavigate,
+  useParams,
+  useSearchParams
+} from 'react-router'
 import { ListFilter } from 'lucide-react'
 import { useForm } from 'react-hook-form'
 
@@ -8,7 +14,8 @@ import { useForm } from 'react-hook-form'
 import {
   useGetAuthorsQuery,
   useGetBooksQuery,
-  type TBookDb
+  type TBookDb,
+  type TBookResponse
 } from '../../features/booksQuery'
 import { Button } from '../ui/button'
 import {
@@ -28,7 +35,7 @@ import {
   SelectTrigger,
   SelectValue
 } from '../ui/select'
-import { genres } from '../../validations/books.validations'
+import { genres, type TGenres } from '../../validations/books.validations'
 
 // BOOK IN A BOOK LIST
 function BookInABookList({ book }: { book: TBookDb }) {
@@ -53,7 +60,7 @@ function BookInABookList({ book }: { book: TBookDb }) {
           </Link>
           <p className='hidden sm:block'>|</p>
           <Link
-            to={book._id}
+            to={`/books/${book._id}`}
             className='text-indigo-500 hover:text-indigo-200 active:text-indigo-200'
           >
             See details
@@ -72,17 +79,20 @@ function BookList({
   bookId: string | undefined
   show: Dispatch<SetStateAction<boolean>>
 }) {
-  // const [searchParams, setSearchParams] = useSearchParams()
+  const [searchParams] = useSearchParams()
 
-  const { data, isError, isLoading, isSuccess } = useGetBooksQuery(undefined, {
-    skip: Boolean(bookId)
-  })
+  const { data, error, isError, isLoading, isSuccess } = useGetBooksQuery(
+    Object.fromEntries(searchParams.entries()),
+    {
+      skip: Boolean(bookId)
+    }
+  )
 
   useEffect(
     function () {
-      show(Boolean(bookId && data))
+      show(() => !data?.data)
     },
-    [show, bookId, data]
+    [data, show]
   )
 
   if (bookId && !data) {
@@ -95,7 +105,12 @@ function BookList({
 
   if (isError) {
     return (
-      <p className='text-xl sm:text-2xl'>There was an error fetching data.</p>
+      <p className='text-xl sm:text-2xl'>
+        {
+          (error as { status: number; data: TBookResponse<Array<TBookDb>> })
+            .data.message
+        }
+      </p>
     )
   }
 
@@ -117,35 +132,65 @@ function BookList({
       </div>
     )
   }
+
+  return <div className='text-xl sm:text-2xl'>No book found.</div>
 }
 
 // FILTER BOX
 function FilterBox() {
-  const [isLoading, setIsLoading] = useState(true)
+  const [searchParams] = useSearchParams()
+  const navigate = useNavigate()
 
-  const filterForm = useForm()
+  const { data, isLoading } = useGetAuthorsQuery()
 
-  const { data, isLoading: isAuthorLoading } = useGetAuthorsQuery()
-
-  useEffect(
-    function () {
-      setIsLoading(isAuthorLoading)
-    },
-    [isAuthorLoading]
-  )
+  const filterForm = useForm<{
+    author?: string
+    genre?: Exclude<TGenres, ''>
+    available?: 'true' | 'false'
+  }>({
+    defaultValues: {
+      author: searchParams.get('author') ?? undefined,
+      genre: (searchParams.get('genre') as Exclude<TGenres, ''>) ?? undefined,
+      available:
+        (searchParams.get('available') as 'true' | 'false') ?? undefined
+    }
+  })
 
   return (
     <div className='border-2 rounded-xl mt-4 mb-8 p-4'>
       <p className='text-md sm:text-2xl font-semibold mb-4'>Filters</p>
 
       <Form {...filterForm}>
-        <form>
+        <form
+          onSubmit={function (event) {
+            event.preventDefault()
+
+            const newSearchParams = {
+              ...Object.fromEntries(searchParams.entries()),
+              ...filterForm.getValues()
+            } as Record<string, string>
+
+            const search = new URLSearchParams()
+
+            Object.keys(newSearchParams).forEach(function (key) {
+              const value = newSearchParams[key]
+
+              if (value !== undefined && value !== '') {
+                search.append(key, value)
+              }
+            })
+
+            filterForm.reset()
+
+            navigate(`/books?${search.toString()}`)
+          }}
+        >
           <div className='grid lg:grid-cols-3 gap-4'>
             {/* Author */}
             {(data?.data as Array<string>)?.length > 0 ? (
               <FormField
                 control={filterForm.control}
-                name='genre'
+                name='author'
                 render={function ({ field }) {
                   return (
                     <FormItem>
@@ -257,7 +302,7 @@ function FilterBox() {
             {/* book availability */}
             <FormField
               control={filterForm.control}
-              name='genre'
+              name='available'
               render={function ({ field }) {
                 return (
                   <FormItem>
@@ -318,10 +363,43 @@ function FilterBox() {
 
 // BOOKS PAGE
 export default function GetBooks() {
+  const [searchParams] = useSearchParams()
+
+  const { id: bookId } = useParams()
+
+  const { data } = useGetBooksQuery(
+    Object.fromEntries(searchParams.entries()),
+    {
+      skip: Boolean(bookId)
+    }
+  )
+
   const [showList, setShowList] = useState(true)
   const [showFilter, setShowFilter] = useState(false)
 
-  const { id } = useParams()
+  useEffect(
+    function () {
+      setShowFilter(false)
+    },
+    [searchParams]
+  )
+
+  useEffect(
+    function () {
+      if (Boolean(bookId) && Boolean(data) === true) {
+        setShowList(function () {
+          return true
+        })
+      }
+
+      if (Boolean(bookId) && Boolean(data) === false) {
+        setShowList(function () {
+          return false
+        })
+      }
+    },
+    [bookId, data, setShowList]
+  )
 
   return (
     <main className='w-full max-w-7xl mx-auto'>
@@ -343,13 +421,15 @@ export default function GetBooks() {
       {showFilter ? <FilterBox /> : <></>}
       <div
         className={
-          id ? `lg:grid${showList ? ` lg:grid-cols-2` : ''} lg:gap-4` : ''
+          bookId ? `lg:grid${showList ? ` lg:grid-cols-2` : ''} lg:gap-4` : ''
         }
       >
-        <BookList
-          bookId={id}
-          show={setShowList}
-        />
+        <div>
+          <BookList
+            bookId={bookId}
+            show={setShowList}
+          />
+        </div>
         <Outlet />
       </div>
     </main>

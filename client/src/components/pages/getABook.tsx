@@ -43,8 +43,11 @@ export default function GetABook() {
         <span className='font-semibold'>Copies available:</span>{' '}
         <span>{book.copies}</span>
       </p>
-      <p className='text-base sm:text-xl mb-6 sm:mb-8'>
+      <p className='text-base sm:text-xl'>
         <span className='font-semibold'>ISBN:</span> {book.isbn}
+      </p>
+      <p className='text-base sm:text-xl my-6 sm:my-8'>
+        <span className='font-semibold'>Genre:</span> {book.genre}
       </p>
       <h3 className='text-base sm:text-xl font-bold'>Description</h3>
       <p className='text-base sm:text-xl'>{book.description}</p>

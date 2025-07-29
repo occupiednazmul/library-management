@@ -39,9 +39,27 @@ export const booksApi = createApi({
           return [{ type: 'Books', id }]
         }
       }),
-      getBooks: builder.query<TBookResponse<Array<TBookDb>>, void>({
-        query: function () {
-          return 'books'
+      getBooks: builder.query<
+        TBookResponse<Array<TBookDb>>,
+        {
+          author?: string
+          genre?: string
+          available?: string
+          sortBy?: string
+          resultsPerPage?: string
+          page?: string
+        }
+      >({
+        query: function (filters = {}) {
+          const searchParams = new URLSearchParams()
+
+          Object.entries(filters).forEach(function ([key, value]) {
+            if (value !== undefined && value !== '') {
+              searchParams.set(key, value)
+            }
+          })
+
+          return `books?${searchParams.toString()}`
         },
         providesTags: ['Books']
       }),

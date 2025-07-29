@@ -1,8 +1,19 @@
 // MODULE IMPORTS
 import { z } from 'zod/v4'
 
+// GENRE TYPE
+export type TGenres =
+  | 'Fiction'
+  | 'Non-fiction'
+  | 'Science'
+  | 'History'
+  | 'Biography'
+  | 'Fantasy'
+  | 'Uncategorized'
+  | ''
+
 // GENRES
-export const genres = [
+export const genres: Array<TGenres> = [
   'Fiction',
   'Non-fiction',
   'Science',
