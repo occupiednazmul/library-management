@@ -28,29 +28,31 @@ export default function GetABook() {
   }
 
   return (
-    <div className='border-2 rounded-lg p-4'>
-      <h2 className='text-lg sm:text-3xl font-bold sm:mb-1'>
-        {data.data?.title}
-      </h2>
-      <p className='text-sm sm:text-lg mb-3'>by {data.data?.author}</p>
-      <img
-        width={120}
-        height={180}
-        src={book.imageURI}
-        alt={book.title}
-      />
-      <p className='text-base sm:text-xl mt-6 sm:mt-8'>
-        <span className='font-semibold'>Copies available:</span>{' '}
-        <span>{book.copies}</span>
-      </p>
-      <p className='text-base sm:text-xl'>
-        <span className='font-semibold'>ISBN:</span> {book.isbn}
-      </p>
-      <p className='text-base sm:text-xl my-6 sm:my-8'>
-        <span className='font-semibold'>Genre:</span> {book.genre}
-      </p>
-      <h3 className='text-base sm:text-xl font-bold'>Description</h3>
-      <p className='text-base sm:text-xl'>{book.description}</p>
+    <div>
+      <div className='border-2 rounded-lg p-4 pb-8'>
+        <h2 className='text-lg sm:text-3xl font-bold sm:mb-1'>
+          {data.data?.title}
+        </h2>
+        <p className='text-sm sm:text-lg mb-3'>by {data.data?.author}</p>
+        <img
+          width={120}
+          height={180}
+          src={book.imageURI}
+          alt={book.title}
+        />
+        <p className='text-base sm:text-xl mt-6 sm:mt-8'>
+          <span className='font-semibold'>Copies available:</span>{' '}
+          <span>{book.copies}</span>
+        </p>
+        <p className='text-base sm:text-xl'>
+          <span className='font-semibold'>ISBN:</span> {book.isbn}
+        </p>
+        <p className='text-base sm:text-xl my-6 sm:my-8'>
+          <span className='font-semibold'>Genre:</span> {book.genre}
+        </p>
+        <h3 className='text-base sm:text-xl font-bold'>Description</h3>
+        <p className='text-base sm:text-xl'>{book.description}</p>
+      </div>
     </div>
   )
 }

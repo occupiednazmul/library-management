@@ -1,5 +1,12 @@
 // MODULE IMPORTS
-import { useEffect, useState, type Dispatch, type SetStateAction } from 'react'
+import {
+  useEffect,
+  useState,
+  type FormEvent,
+  type ChangeEvent,
+  type Dispatch,
+  type SetStateAction
+} from 'react'
 import {
   Link,
   Outlet,
@@ -9,6 +16,8 @@ import {
 } from 'react-router'
 import { ListFilter } from 'lucide-react'
 import { useForm } from 'react-hook-form'
+import type { FetchBaseQueryError } from '@reduxjs/toolkit/query/react'
+import type { SerializedError } from '@reduxjs/toolkit'
 
 // LOCAL IMPORTS
 import {
@@ -74,20 +83,21 @@ function BookInABookList({ book }: { book: TBookDb }) {
 // GET A LIST OF BOOKS
 function BookList({
   bookId,
-  show
+  show,
+  data,
+  error,
+  isError,
+  isLoading,
+  isSuccess
 }: {
   bookId: string | undefined
   show: Dispatch<SetStateAction<boolean>>
+  data: TBookResponse<Array<TBookDb>> | undefined
+  error: FetchBaseQueryError | SerializedError | undefined
+  isError: boolean
+  isLoading: boolean
+  isSuccess: boolean
 }) {
-  const [searchParams] = useSearchParams()
-
-  const { data, error, isError, isLoading, isSuccess } = useGetBooksQuery(
-    Object.fromEntries(searchParams.entries()),
-    {
-      skip: Boolean(bookId)
-    }
-  )
-
   useEffect(
     function () {
       show(() => !data?.data)
@@ -116,19 +126,21 @@ function BookList({
 
   if (isSuccess && (data?.data as Array<TBookDb>).length > 0) {
     return (
-      <div
-        className={
-          bookId ? 'hidden lg:grid gap-4' : 'grid lg:grid-cols-2 gap-4'
-        }
-      >
-        {data?.data?.map(function (bookInfo) {
-          return (
-            <BookInABookList
-              book={bookInfo}
-              key={bookInfo._id}
-            />
-          )
-        })}
+      <div>
+        <div
+          className={
+            bookId ? 'hidden lg:grid gap-4' : 'grid lg:grid-cols-2 gap-4'
+          }
+        >
+          {data?.data?.map(function (bookInfo) {
+            return (
+              <BookInABookList
+                book={bookInfo}
+                key={bookInfo._id}
+              />
+            )
+          })}
+        </div>
       </div>
     )
   }
@@ -137,7 +149,7 @@ function BookList({
 }
 
 // FILTER BOX
-function FilterBox() {
+function FilterBox({ filterBox }: { filterBox: boolean }) {
   const [searchParams] = useSearchParams()
   const navigate = useNavigate()
 
@@ -156,208 +168,219 @@ function FilterBox() {
     }
   })
 
+  function redirectQuery(
+    event: FormEvent<HTMLFormElement> | ChangeEvent<HTMLSelectElement>
+  ) {
+    event.preventDefault()
+
+    const newSearchParams = {
+      ...Object.fromEntries(searchParams.entries()),
+      ...filterForm.getValues()
+    } as Record<string, string>
+
+    const search = new URLSearchParams()
+
+    Object.keys(newSearchParams).forEach(function (key) {
+      const value = newSearchParams[key]
+
+      if (value !== undefined && value !== '') {
+        search.append(key, value)
+      }
+    })
+
+    filterForm.reset()
+
+    navigate(`/books?${search.toString()}`)
+  }
+
   return (
-    <div className='border-2 rounded-xl mt-4 mb-8 p-4'>
-      <p className='text-md sm:text-2xl font-semibold mb-4'>Filters</p>
+    <>
+      {filterBox ? (
+        <div className='border-2 rounded-xl mt-4 mb-4 p-4'>
+          <p className='text-md sm:text-2xl font-semibold mb-4'>Filters</p>
 
-      <Form {...filterForm}>
-        <form
-          onSubmit={function (event) {
-            event.preventDefault()
+          <Form {...filterForm}>
+            <form onSubmit={redirectQuery}>
+              <div className='grid lg:grid-cols-3 gap-4'>
+                {/* Author */}
+                {(data?.data as Array<string>)?.length > 0 ? (
+                  <FormField
+                    control={filterForm.control}
+                    name='author'
+                    render={function ({ field }) {
+                      return (
+                        <FormItem>
+                          <FormLabel className='font-bold text-base sm:text-xl'>
+                            Author
+                          </FormLabel>
+                          <FormControl>
+                            <Select
+                              {...field}
+                              onValueChange={field.onChange}
+                              disabled={isLoading}
+                            >
+                              <SelectTrigger
+                                className='w-full text-base sm:text-xl'
+                                disabled={isLoading}
+                              >
+                                <SelectValue placeholder='Author name' />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {data?.data?.map(function (author) {
+                                  return (
+                                    <SelectItem
+                                      key={author}
+                                      value={author}
+                                      className='text-base sm:text-xl'
+                                    >
+                                      {author}
+                                    </SelectItem>
+                                  )
+                                })}
+                              </SelectContent>
+                            </Select>
+                          </FormControl>
+                          <FormDescription className='hidden'>
+                            Author
+                          </FormDescription>
+                          <FormMessage />
+                        </FormItem>
+                      )
+                    }}
+                  />
+                ) : (
+                  <FormField
+                    control={filterForm.control}
+                    name='author'
+                    render={function (field) {
+                      return (
+                        <FormItem>
+                          <FormLabel className='font-bold text-base sm:text-xl'>
+                            Author
+                          </FormLabel>
+                          <FormControl>
+                            <Input
+                              placeholder='Author name'
+                              {...field}
+                              className='text-base sm:text-xl'
+                            />
+                          </FormControl>
+                        </FormItem>
+                      )
+                    }}
+                  />
+                )}
 
-            const newSearchParams = {
-              ...Object.fromEntries(searchParams.entries()),
-              ...filterForm.getValues()
-            } as Record<string, string>
-
-            const search = new URLSearchParams()
-
-            Object.keys(newSearchParams).forEach(function (key) {
-              const value = newSearchParams[key]
-
-              if (value !== undefined && value !== '') {
-                search.append(key, value)
-              }
-            })
-
-            filterForm.reset()
-
-            navigate(`/books?${search.toString()}`)
-          }}
-        >
-          <div className='grid lg:grid-cols-3 gap-4'>
-            {/* Author */}
-            {(data?.data as Array<string>)?.length > 0 ? (
-              <FormField
-                control={filterForm.control}
-                name='author'
-                render={function ({ field }) {
-                  return (
-                    <FormItem>
-                      <FormLabel className='font-bold text-base sm:text-xl'>
-                        Author
-                      </FormLabel>
-                      <FormControl>
-                        <Select
-                          {...field}
-                          onValueChange={field.onChange}
-                          disabled={isLoading}
-                        >
-                          <SelectTrigger
-                            className='w-full text-base sm:text-xl'
+                {/* book genre */}
+                <FormField
+                  control={filterForm.control}
+                  name='genre'
+                  render={function ({ field }) {
+                    return (
+                      <FormItem>
+                        <FormLabel className='font-bold text-base sm:text-xl'>
+                          Genre
+                        </FormLabel>
+                        <FormControl>
+                          <Select
+                            {...field}
+                            onValueChange={field.onChange}
                             disabled={isLoading}
                           >
-                            <SelectValue placeholder='Author name' />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {data?.data?.map(function (author) {
-                              return (
-                                <SelectItem
-                                  key={author}
-                                  value={author}
-                                  className='text-base sm:text-xl'
-                                >
-                                  {author}
-                                </SelectItem>
-                              )
-                            })}
-                          </SelectContent>
-                        </Select>
-                      </FormControl>
-                      <FormDescription className='hidden'>
-                        Author
-                      </FormDescription>
-                      <FormMessage />
-                    </FormItem>
-                  )
-                }}
-              />
-            ) : (
-              <FormField
-                control={filterForm.control}
-                name='author'
-                render={function (field) {
-                  return (
-                    <FormItem>
-                      <FormLabel className='font-bold text-base sm:text-xl'>
-                        Author
-                      </FormLabel>
-                      <FormControl>
-                        <Input
-                          placeholder='Author name'
-                          {...field}
-                          className='text-base sm:text-xl'
-                        />
-                      </FormControl>
-                    </FormItem>
-                  )
-                }}
-              />
-            )}
+                            <SelectTrigger
+                              className='w-full text-base sm:text-xl'
+                              disabled={isLoading}
+                            >
+                              <SelectValue placeholder='Book genre' />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {genres.map(function (genre) {
+                                return (
+                                  <SelectItem
+                                    key={genre}
+                                    value={genre}
+                                    className='text-base sm:text-xl'
+                                  >
+                                    {genre}
+                                  </SelectItem>
+                                )
+                              })}
+                            </SelectContent>
+                          </Select>
+                        </FormControl>
+                        <FormDescription className='hidden'>
+                          Genres
+                        </FormDescription>
+                        <FormMessage />
+                      </FormItem>
+                    )
+                  }}
+                />
 
-            {/* book genre */}
-            <FormField
-              control={filterForm.control}
-              name='genre'
-              render={function ({ field }) {
-                return (
-                  <FormItem>
-                    <FormLabel className='font-bold text-base sm:text-xl'>
-                      Genre
-                    </FormLabel>
-                    <FormControl>
-                      <Select
-                        {...field}
-                        onValueChange={field.onChange}
-                        disabled={isLoading}
-                      >
-                        <SelectTrigger
-                          className='w-full text-base sm:text-xl'
-                          disabled={isLoading}
-                        >
-                          <SelectValue placeholder='Book genre' />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {genres.map(function (genre) {
-                            return (
+                {/* book availability */}
+                <FormField
+                  control={filterForm.control}
+                  name='available'
+                  render={function ({ field }) {
+                    return (
+                      <FormItem>
+                        <FormLabel className='font-bold text-base sm:text-xl'>
+                          Available
+                        </FormLabel>
+                        <FormControl>
+                          <Select
+                            {...field}
+                            onValueChange={field.onChange}
+                            disabled={isLoading}
+                          >
+                            <SelectTrigger
+                              className='w-full text-base sm:text-xl'
+                              disabled={isLoading}
+                            >
+                              <SelectValue placeholder='Book availability' />
+                            </SelectTrigger>
+                            <SelectContent>
                               <SelectItem
-                                key={genre}
-                                value={genre}
+                                value='true'
                                 className='text-base sm:text-xl'
                               >
-                                {genre}
+                                Yes
                               </SelectItem>
-                            )
-                          })}
-                        </SelectContent>
-                      </Select>
-                    </FormControl>
-                    <FormDescription className='hidden'>Genres</FormDescription>
-                    <FormMessage />
-                  </FormItem>
-                )
-              }}
-            />
+                              <SelectItem
+                                value='false'
+                                className='text-base sm:text-xl'
+                              >
+                                No
+                              </SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </FormControl>
+                        <FormDescription className='hidden'>
+                          Book availability
+                        </FormDescription>
+                        <FormMessage />
+                      </FormItem>
+                    )
+                  }}
+                />
+              </div>
 
-            {/* book availability */}
-            <FormField
-              control={filterForm.control}
-              name='available'
-              render={function ({ field }) {
-                return (
-                  <FormItem>
-                    <FormLabel className='font-bold text-base sm:text-xl'>
-                      Available
-                    </FormLabel>
-                    <FormControl>
-                      <Select
-                        {...field}
-                        onValueChange={field.onChange}
-                        disabled={isLoading}
-                      >
-                        <SelectTrigger
-                          className='w-full text-base sm:text-xl'
-                          disabled={isLoading}
-                        >
-                          <SelectValue placeholder='Book availability' />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem
-                            value='true'
-                            className='text-base sm:text-xl'
-                          >
-                            Yes
-                          </SelectItem>
-                          <SelectItem
-                            value='false'
-                            className='text-base sm:text-xl'
-                          >
-                            No
-                          </SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </FormControl>
-                    <FormDescription className='hidden'>
-                      Book availability
-                    </FormDescription>
-                    <FormMessage />
-                  </FormItem>
-                )
-              }}
-            />
-          </div>
-
-          {/* Apply filters */}
-          <Button
-            size='lg'
-            className='w-full mt-6 cursor-pointer'
-            disabled={isLoading}
-          >
-            Apply filters
-          </Button>
-        </form>
-      </Form>
-    </div>
+              {/* Apply filters */}
+              <Button
+                size='lg'
+                className='w-full mt-6 cursor-pointer'
+                disabled={isLoading}
+              >
+                Apply filters
+              </Button>
+            </form>
+          </Form>
+        </div>
+      ) : (
+        <></>
+      )}
+      <div className='mb-8'>Sort by, results per page, page</div>
+    </>
   )
 }
 
@@ -367,7 +390,7 @@ export default function GetBooks() {
 
   const { id: bookId } = useParams()
 
-  const { data } = useGetBooksQuery(
+  const { data, error, isError, isLoading, isSuccess } = useGetBooksQuery(
     Object.fromEntries(searchParams.entries()),
     {
       skip: Boolean(bookId)
@@ -414,22 +437,26 @@ export default function GetBooks() {
           onClick={function () {
             setShowFilter(cur => !cur)
           }}
+          disabled={isLoading}
         >
           Filter <ListFilter />
         </Button>
       </div>
-      {showFilter ? <FilterBox /> : <></>}
+      <FilterBox filterBox={showFilter} />
       <div
         className={
           bookId ? `lg:grid${showList ? ` lg:grid-cols-2` : ''} lg:gap-4` : ''
         }
       >
-        <div>
-          <BookList
-            bookId={bookId}
-            show={setShowList}
-          />
-        </div>
+        <BookList
+          bookId={bookId}
+          show={setShowList}
+          data={data}
+          error={error}
+          isLoading={isLoading}
+          isError={isError}
+          isSuccess={isSuccess}
+        />
         <Outlet />
       </div>
     </main>
