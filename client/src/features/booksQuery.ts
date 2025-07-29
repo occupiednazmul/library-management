@@ -61,6 +61,11 @@ export const booksApi = createApi({
         invalidatesTags: function (_, __, { id }) {
           return [{ type: 'Books', id }]
         }
+      }),
+      getAuthors: builder.query<TBookResponse<Array<string>>, void>({
+        query: function () {
+          return 'books/authors'
+        }
       })
     }
   }
@@ -71,5 +76,6 @@ export const {
   useGetBookQuery,
   useGetBooksQuery,
   useCreateBookMutation,
-  useUpdateBookMutation
+  useUpdateBookMutation,
+  useGetAuthorsQuery
 } = booksApi

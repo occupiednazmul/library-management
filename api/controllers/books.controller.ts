@@ -82,6 +82,38 @@ booksRouter
     throw Error(responseCodes.METHOD_NOT_ALLOWED.toString())
   })
 
+// PATH - /api/books/author
+booksRouter
+  .route('/authors')
+  .get(async function (req: Request, res: Response, next: NextFunction) {
+    try {
+      const authors = (
+        (await MBook.aggregate([
+          {
+            $group: {
+              _id: '$author'
+            }
+          }
+        ])) as Array<{ _id: string }>
+      ).map(function (item) {
+        return item._id
+      })
+
+      res.json({
+        success: true,
+        message: `${authors.length} author${
+          authors.length === 1 ? '' : 's'
+        } found.`,
+        data: authors
+      })
+    } catch (error) {
+      next(error)
+    }
+  })
+  .all(function (req: Request, res: Response) {
+    throw Error(responseCodes.METHOD_NOT_ALLOWED.toString())
+  })
+
 // PATH - /api/books/:bookId
 booksRouter
   .route('/:bookId')
