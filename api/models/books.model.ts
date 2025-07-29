@@ -50,7 +50,6 @@ export const bookDataValidation = z.strictObject({
 
 // BOOK QUERY VALIDATION
 export const bookFiltersValidation = z.strictObject({
-  title: z.string().optional(),
   author: z.string().optional(),
   genre: z
     .enum([
