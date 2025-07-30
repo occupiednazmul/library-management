@@ -45,6 +45,17 @@ import {
   SelectValue
 } from '../ui/select'
 import { genres, type TGenres } from '../../validations/books.validations'
+import { Label } from '../ui/label'
+import { ToggleGroup, ToggleGroupItem } from '../ui/toggle-group'
+import {
+  Pagination,
+  PaginationContent,
+  PaginationEllipsis,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious
+} from '../ui/pagination'
 
 // BOOK IN A BOOK LIST
 function BookInABookList({ book }: { book: TBookDb }) {
@@ -149,7 +160,13 @@ function BookList({
 }
 
 // FILTER BOX
-function FilterBox({ filterBox }: { filterBox: boolean }) {
+function FilterBox({
+  filterBox,
+  totalResults
+}: {
+  filterBox: boolean
+  totalResults: number
+}) {
   const [searchParams] = useSearchParams()
   const navigate = useNavigate()
 
@@ -168,9 +185,7 @@ function FilterBox({ filterBox }: { filterBox: boolean }) {
     }
   })
 
-  function redirectQuery(
-    event: FormEvent<HTMLFormElement> | ChangeEvent<HTMLSelectElement>
-  ) {
+  function setFiltersAndRedirect(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
 
     const newSearchParams = {
@@ -193,6 +208,27 @@ function FilterBox({ filterBox }: { filterBox: boolean }) {
     navigate(`/books?${search.toString()}`)
   }
 
+  function setShowAndRedirect(sortAndPage: Record<string, string | number>) {
+    const newParams = {
+      ...Object.fromEntries(searchParams.entries()),
+      ...sortAndPage
+    }
+
+    const search = new URLSearchParams()
+
+    Object.keys(newParams).forEach(function (key) {
+      const value = newParams[key]
+
+      if (value !== undefined && value !== '') {
+        search.append(key, value.toString())
+      }
+    })
+
+    filterForm.reset()
+
+    navigate(`/books?${search.toString()}`)
+  }
+
   return (
     <>
       {filterBox ? (
@@ -200,7 +236,7 @@ function FilterBox({ filterBox }: { filterBox: boolean }) {
           <p className='text-md sm:text-2xl font-semibold mb-4'>Filters</p>
 
           <Form {...filterForm}>
-            <form onSubmit={redirectQuery}>
+            <form onSubmit={setFiltersAndRedirect}>
               <div className='grid lg:grid-cols-3 gap-4'>
                 {/* Author */}
                 {(data?.data as Array<string>)?.length > 0 ? (
@@ -379,7 +415,127 @@ function FilterBox({ filterBox }: { filterBox: boolean }) {
       ) : (
         <></>
       )}
-      <div className='mb-8'>Sort by, results per page, page</div>
+      {totalResults > 0 ? (
+        <div className='mb-8'>
+          {/* Sort By Filter */}
+          <div className='grid gap-2'>
+            <Label
+              htmlFor='sortBy'
+              className='font-bold text-base sm:text-xl'
+            >
+              Sort by:
+            </Label>
+            <Select
+              onValueChange={function (value) {
+                setShowAndRedirect({ sortBy: value })
+              }}
+              disabled={isLoading}
+            >
+              <SelectTrigger
+                name='sortBy'
+                id='sortBy'
+                className='w-full text-base sm:text-xl'
+                disabled={isLoading}
+              >
+                <SelectValue placeholder='Sort by' />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem
+                  value='desc'
+                  className='text-base sm:text-xl'
+                >
+                  Latest to oldest
+                </SelectItem>
+                <SelectItem
+                  value='asc'
+                  className='text-base sm:text-xl'
+                >
+                  Oldest to latest
+                </SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          {/* Results to show per page */}
+          <div className='grid gap-2'>
+            <Label
+              htmlFor='resultsPerPage'
+              className='font-bold text-base sm:text-xl'
+            >
+              Results per page:
+            </Label>
+            <ToggleGroup
+              id='resultsPerPage'
+              type='multiple'
+              variant='outline'
+              onValueChange={function (value) {
+                console.log(value)
+                // setShowAndRedirect({ sortBy: value })
+              }}
+            >
+              <ToggleGroupItem
+                className='w-12 sm:w-16 h-10 sm:h-11 text-base sm:text-xl'
+                value='10'
+                aria-label='10'
+              >
+                10
+              </ToggleGroupItem>
+              <ToggleGroupItem
+                className='w-12 sm:w-16 h-10 sm:h-11 text-base sm:text-xl'
+                value='20'
+                aria-label='20'
+              >
+                20
+              </ToggleGroupItem>
+              <ToggleGroupItem
+                className='w-12 sm:w-16 h-10 sm:h-11 text-base sm:text-xl'
+                value='50'
+                aria-label='50'
+              >
+                50
+              </ToggleGroupItem>
+              <ToggleGroupItem
+                className='w-12 sm:w-16 h-10 sm:h-11 text-base sm:text-xl'
+                value='100'
+                aria-label='100'
+              >
+                100
+              </ToggleGroupItem>
+            </ToggleGroup>
+          </div>
+
+          {/* pagination */}
+          <div className='grid gap-2'>
+            <Label
+              htmlFor='page'
+              className='font-bold text-base sm:text-xl'
+            >
+              Page:
+            </Label>
+            <Pagination id='page'>
+              <PaginationContent>
+                <PaginationItem>
+                  <PaginationPrevious href='#' />
+                </PaginationItem>
+                <PaginationItem>
+                  <PaginationLink href='#'>1</PaginationLink>
+                </PaginationItem>
+                <PaginationItem>
+                  <PaginationLink href='#'>2</PaginationLink>
+                </PaginationItem>
+                <PaginationItem>
+                  <PaginationEllipsis />
+                </PaginationItem>
+                <PaginationItem>
+                  <PaginationNext href='#' />
+                </PaginationItem>
+              </PaginationContent>
+            </Pagination>
+          </div>
+        </div>
+      ) : (
+        <></>
+      )}
     </>
   )
 }
@@ -420,6 +576,8 @@ export default function GetBooks() {
           return false
         })
       }
+
+      console.log(data)
     },
     [bookId, data, setShowList]
   )
@@ -442,7 +600,10 @@ export default function GetBooks() {
           Filter <ListFilter />
         </Button>
       </div>
-      <FilterBox filterBox={showFilter} />
+      <FilterBox
+        filterBox={showFilter}
+        totalResults={data?.booksCount as number}
+      />
       <div
         className={
           bookId ? `lg:grid${showList ? ` lg:grid-cols-2` : ''} lg:gap-4` : ''

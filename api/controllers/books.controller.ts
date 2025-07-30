@@ -42,8 +42,11 @@ booksRouter
       .limit(resultsPerPage)
       .skip((page - 1) * resultsPerPage)
 
+    const booksCount = await MBook.countDocuments(filters)
+
     res.json({
       success: true,
+      booksCount: booksCount,
       message: `${books.length} book${books.length === 1 ? '' : 's'} provided.`,
       data: books
     })

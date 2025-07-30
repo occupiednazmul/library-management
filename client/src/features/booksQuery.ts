@@ -15,6 +15,7 @@ export type TBookDb = TBookNew & {
 export type TBookResponse<T> = {
   success: boolean
   message: string
+  booksCount?: number
   data?: T
   error?: unknown
 }
