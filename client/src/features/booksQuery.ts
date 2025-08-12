@@ -85,6 +85,10 @@ export const booksApi = createApi({
         query: function () {
           return 'books/authors'
         }
+      }),
+      getLatestBooks: builder.query<TBookResponse<Array<TBookDb>>, void>({
+        query: () => `books/latest`,
+        providesTags: ['Books']
       })
     }
   }
@@ -96,5 +100,6 @@ export const {
   useGetBooksQuery,
   useCreateBookMutation,
   useUpdateBookMutation,
-  useGetAuthorsQuery
+  useGetAuthorsQuery,
+  useGetLatestBooksQuery
 } = booksApi

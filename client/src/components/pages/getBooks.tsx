@@ -3,7 +3,6 @@ import {
   useEffect,
   useState,
   type FormEvent,
-  type ChangeEvent,
   type Dispatch,
   type SetStateAction
 } from 'react'
@@ -46,7 +45,6 @@ import {
 } from '../ui/select'
 import { genres, type TGenres } from '../../validations/books.validations'
 import { Label } from '../ui/label'
-import { ToggleGroup, ToggleGroupItem } from '../ui/toggle-group'
 import {
   Pagination,
   PaginationContent,
@@ -56,6 +54,7 @@ import {
   PaginationNext,
   PaginationPrevious
 } from '../ui/pagination'
+import { Tabs, TabsList, TabsTrigger } from '../ui/tabs'
 
 // BOOK IN A BOOK LIST
 function BookInABookList({ book }: { book: TBookDb }) {
@@ -170,6 +169,14 @@ function FilterBox({
   const [searchParams] = useSearchParams()
   const navigate = useNavigate()
 
+  const page = Number(searchParams.get('page') ?? '1')
+  const resultsPerPage = Number(searchParams.get('resultsPerPage') ?? '10')
+
+  const totalPages = Math.max(
+    1,
+    Math.ceil((totalResults ?? 0) / Math.max(1, resultsPerPage))
+  )
+
   const { data, isLoading } = useGetAuthorsQuery()
 
   const filterForm = useForm<{
@@ -185,48 +192,46 @@ function FilterBox({
     }
   })
 
+  function buildSearch(
+    init: URLSearchParams,
+    updates: Record<string, string | number | undefined>
+  ) {
+    const merged = { ...Object.fromEntries(init.entries()) } as Record<
+      string,
+      string
+    >
+    for (const [k, v] of Object.entries(updates)) {
+      if (v === undefined || v === '') delete merged[k]
+      else merged[k] = String(v)
+    }
+    const search = new URLSearchParams()
+    Object.entries(merged).forEach(([k, v]) => v && search.append(k, v))
+    return `?${search.toString()}`
+  }
+
   function setFiltersAndRedirect(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
 
     const newSearchParams = {
       ...Object.fromEntries(searchParams.entries()),
-      ...filterForm.getValues()
-    } as Record<string, string>
+      ...filterForm.getValues(),
+      page: 1
+    } as Record<string, string | number | undefined>
 
-    const search = new URLSearchParams()
-
-    Object.keys(newSearchParams).forEach(function (key) {
-      const value = newSearchParams[key]
-
-      if (value !== undefined && value !== '') {
-        search.append(key, value)
-      }
-    })
-
-    filterForm.reset()
-
-    navigate(`/books?${search.toString()}`)
+    navigate(`/books${buildSearch(searchParams, newSearchParams)}`)
   }
 
-  function setShowAndRedirect(sortAndPage: Record<string, string | number>) {
+  function setShowAndRedirect(
+    sortAndPage: Record<string, string | number>,
+    resetPage = false
+  ) {
     const newParams = {
       ...Object.fromEntries(searchParams.entries()),
-      ...sortAndPage
+      ...sortAndPage,
+      ...(resetPage ? { page: 1 } : {})
     }
 
-    const search = new URLSearchParams()
-
-    Object.keys(newParams).forEach(function (key) {
-      const value = newParams[key]
-
-      if (value !== undefined && value !== '') {
-        search.append(key, value.toString())
-      }
-    })
-
-    filterForm.reset()
-
-    navigate(`/books?${search.toString()}`)
+    navigate(`/books${buildSearch(searchParams, newParams)}`)
   }
 
   return (
@@ -415,10 +420,11 @@ function FilterBox({
       ) : (
         <></>
       )}
+
       {totalResults > 0 ? (
-        <div className='mb-8'>
+        <div className='mb-8 flex flex-col md:flex-row md:justify-between gap-4'>
           {/* Sort By Filter */}
-          <div className='grid gap-2'>
+          <div className='grid gap-2 w-full md:w-60'>
             <Label
               htmlFor='sortBy'
               className='font-bold text-base sm:text-xl'
@@ -427,7 +433,7 @@ function FilterBox({
             </Label>
             <Select
               onValueChange={function (value) {
-                setShowAndRedirect({ sortBy: value })
+                setShowAndRedirect({ sortBy: value }, true)
               }}
               disabled={isLoading}
             >
@@ -456,81 +462,138 @@ function FilterBox({
             </Select>
           </div>
 
-          {/* Results to show per page */}
-          <div className='grid gap-2'>
-            <Label
-              htmlFor='resultsPerPage'
-              className='font-bold text-base sm:text-xl'
-            >
-              Results per page:
-            </Label>
-            <ToggleGroup
-              id='resultsPerPage'
-              type='multiple'
-              variant='outline'
-              onValueChange={function (value) {
-                console.log(value)
-                // setShowAndRedirect({ sortBy: value })
-              }}
-            >
-              <ToggleGroupItem
-                className='w-12 sm:w-16 h-10 sm:h-11 text-base sm:text-xl'
-                value='10'
-                aria-label='10'
+          <div className='flex flex-col sm:flex-row sm:justify-between gap-4 sm:gap-10'>
+            {/* Results to show per page */}
+            <div className='grid gap-2'>
+              <Label
+                htmlFor='resultsPerPage'
+                className='font-bold text-base sm:text-xl'
               >
-                10
-              </ToggleGroupItem>
-              <ToggleGroupItem
-                className='w-12 sm:w-16 h-10 sm:h-11 text-base sm:text-xl'
-                value='20'
-                aria-label='20'
+                Results per page:
+              </Label>
+              <Tabs
+                value={String(resultsPerPage)}
+                onValueChange={function (value) {
+                  setShowAndRedirect({ resultsPerPage: Number(value) }, true)
+                }}
               >
-                20
-              </ToggleGroupItem>
-              <ToggleGroupItem
-                className='w-12 sm:w-16 h-10 sm:h-11 text-base sm:text-xl'
-                value='50'
-                aria-label='50'
-              >
-                50
-              </ToggleGroupItem>
-              <ToggleGroupItem
-                className='w-12 sm:w-16 h-10 sm:h-11 text-base sm:text-xl'
-                value='100'
-                aria-label='100'
-              >
-                100
-              </ToggleGroupItem>
-            </ToggleGroup>
-          </div>
+                <TabsList className='h-11'>
+                  <TabsTrigger
+                    value='10'
+                    className='w-10'
+                  >
+                    10
+                  </TabsTrigger>
+                  <TabsTrigger
+                    value='20'
+                    className='w-10'
+                  >
+                    20
+                  </TabsTrigger>
+                  <TabsTrigger
+                    value='50'
+                    className='w-10'
+                  >
+                    50
+                  </TabsTrigger>
+                  <TabsTrigger
+                    value='100'
+                    className='w-10'
+                  >
+                    100
+                  </TabsTrigger>
+                </TabsList>
+              </Tabs>
+            </div>
 
-          {/* pagination */}
-          <div className='grid gap-2'>
-            <Label
-              htmlFor='page'
-              className='font-bold text-base sm:text-xl'
-            >
-              Page:
-            </Label>
-            <Pagination id='page'>
-              <PaginationContent>
-                <PaginationItem>
-                  <PaginationPrevious href='#' />
-                </PaginationItem>
-                <PaginationItem>
-                  <PaginationLink href='#'>1</PaginationLink>
-                </PaginationItem>
-                <PaginationItem>
-                  <PaginationLink href='#'>2</PaginationLink>
-                </PaginationItem>
-                <PaginationItem>
-                  <PaginationEllipsis />
-                </PaginationItem>
-                <PaginationItem>
-                  <PaginationNext href='#' />
-                </PaginationItem>
-              </PaginationContent>
-            </Pagination>
+            {/* pagination */}
+            <div className='grid gap-2'>
+              <Label
+                htmlFor='page'
+                className='font-bold text-base sm:text-xl'
+              >
+                Page:
+              </Label>
+              <Pagination id='page'>
+                <PaginationContent className='h-10'>
+                  {/* Prev */}
+                  <PaginationItem>
+                    <PaginationPrevious
+                      href='#'
+                      onClick={e => {
+                        e.preventDefault()
+                        if (page > 1) setShowAndRedirect({ page: page - 1 })
+                      }}
+                      aria-disabled={page <= 1}
+                      className={
+                        page <= 1 ? 'pointer-events-none opacity-50' : ''
+                      }
+                    />
+                  </PaginationItem>
+
+                  {/* Page numbers: current ±2 plus first/last with ellipsis */}
+                  {(() => {
+                    const nums: number[] = []
+                    const push = (n: number) => {
+                      if (!nums.includes(n) && n >= 1 && n <= totalPages)
+                        nums.push(n)
+                    }
+
+                    push(1)
+                    push(totalPages)
+                    for (let n = page - 2; n <= page + 2; n++) push(n)
+                    nums.sort((a, b) => a - b)
+
+                    const items: ReturnType<typeof PaginationItem>[] = []
+                    for (let i = 0; i < nums.length; i++) {
+                      const n = nums[i]
+                      const prev = nums[i - 1]
+                      if (i > 0 && prev! + 1 !== n) {
+                        items.push(
+                          <PaginationItem key={`ellipsis-${i}`}>
+                            <PaginationEllipsis />
+                          </PaginationItem>
+                        )
+                      }
+
+                      items.push(
+                        <PaginationItem key={n}>
+                          <PaginationLink
+                            href='#'
+                            isActive={n === page}
+                            onClick={e => {
+                              e.preventDefault()
+                              if (n !== page) setShowAndRedirect({ page: n })
+                            }}
+                          >
+                            {n}
+                          </PaginationLink>
+                        </PaginationItem>
+                      )
+                    }
+                    return items
+                  })()}
+
+                  {/* Next */}
+                  <PaginationItem>
+                    <PaginationNext
+                      href='#'
+                      onClick={e => {
+                        e.preventDefault()
+                        if (page < totalPages)
+                          setShowAndRedirect({ page: page + 1 })
+                      }}
+                      aria-disabled={page >= totalPages}
+                      className={
+                        page >= totalPages
+                          ? 'pointer-events-none opacity-50'
+                          : ''
+                      }
+                    />
+                  </PaginationItem>
+                </PaginationContent>
+              </Pagination>
+            </div>
           </div>
         </div>
       ) : (

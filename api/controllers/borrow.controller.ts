@@ -3,12 +3,8 @@ import { NextFunction, Request, Response, Router } from 'express'
 import { startSession } from 'mongoose'
 
 // LOCAL IMPORTS
-import {
-  MBorrow,
-  TBorrow,
-  borrowDataValidation
-} from '../models/borrow.model.js'
-import { ControllerError, responseCodes } from '../utilities/global.handlers.js'
+import { MBorrow, borrowDataValidation } from '../models/borrow.model.js'
+import { responseCodes } from '../utilities/global.handlers.js'
 import { MBook } from '../models/books.model.js'
 
 // BORROW ROUTER
@@ -100,6 +96,49 @@ borrowRouter
     }
   })
   .all(function (req: Request, res: Response) {
+    throw Error(responseCodes.METHOD_NOT_ALLOWED.toString())
+  })
+
+borrowRouter
+  .route('/popular')
+  .get(async function (req: Request, res: Response, next: NextFunction) {
+    try {
+      const popular = await MBorrow.aggregate([
+        { $group: { _id: '$book', totalQuantity: { $sum: '$quantity' } } },
+        { $sort: { totalQuantity: -1 } },
+        { $limit: 5 },
+        {
+          $lookup: {
+            from: 'books',
+            let: { bookId: '$_id' },
+            pipeline: [
+              { $match: { $expr: { $eq: ['$_id', '$$bookId'] } } },
+              { $project: { title: 1, isbn: 1, imageURI: 1 } }
+            ],
+            as: 'bookInfo'
+          }
+        },
+        { $unwind: '$bookInfo' },
+        {
+          $project: {
+            _id: 0,
+            bookId: '$_id',
+            totalQuantity: 1,
+            book: '$bookInfo'
+          }
+        }
+      ])
+
+      res.json({
+        success: true,
+        message: `${popular.length} most borrowed book(s)`,
+        data: popular
+      })
+    } catch (error) {
+      next(error)
+    }
+  })
+  .all(function () {
     throw Error(responseCodes.METHOD_NOT_ALLOWED.toString())
   })
 

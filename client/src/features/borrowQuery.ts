@@ -4,6 +4,7 @@ import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react'
 // LOCAL IMPORTS
 import { type TBorrow } from '../validations/borrow.validation'
 import type { TBookNew } from '../validations/books.validations'
+import type { TBookDb, TBookResponse } from './booksQuery'
 
 // API RESPONSE TYPES
 export type TBorrowResponse<T> = {
@@ -43,10 +44,23 @@ export const borrowApi = createApi({
           return { url: 'borrow', method: 'POST', body: borrowData }
         },
         invalidatesTags: ['Borrow']
+      }),
+      getPopularBooks: builder.query<
+        TBookResponse<
+          Array<{ book: TBookDb; bookId: string; totalQuantity: number }>
+        >,
+        void
+      >({
+        query: () => `borrow/popular`,
+        providesTags: ['Borrow']
       })
     }
   }
 })
 
 // EXPORTS
-export const { useBorrowSummaryQuery, useBorrowBookMutation } = borrowApi
+export const {
+  useBorrowSummaryQuery,
+  useBorrowBookMutation,
+  useGetPopularBooksQuery
+} = borrowApi

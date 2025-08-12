@@ -117,6 +117,22 @@ booksRouter
     throw Error(responseCodes.METHOD_NOT_ALLOWED.toString())
   })
 
+// PATH - /api/books/latest
+booksRouter
+  .route('/latest')
+  .get(async function (req, res) {
+    const books = await MBook.find({}, {}).sort({ createdAt: -1 }).limit(5)
+
+    res.json({
+      success: true,
+      message: `Latest books`,
+      data: books
+    })
+  })
+  .all(function () {
+    throw Error(responseCodes.METHOD_NOT_ALLOWED.toString())
+  })
+
 // PATH - /api/books/:bookId
 booksRouter
   .route('/:bookId')
