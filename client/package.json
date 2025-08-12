@@ -1,6 +1,6 @@
 {
   "name": "library-management-frontend",
-  "version": "0.0.14",
+  "version": "1.0.0",
   "type": "module",
   "private": true,
   "scripts": {
